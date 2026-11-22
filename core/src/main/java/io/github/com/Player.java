@@ -1,19 +1,30 @@
 package io.github.com;
 
+import com.badlogic.gdx.math.Rectangle;
+
 public class Player {
-    float xLocation;
-    float yLocation;
+    float x;
+    float y;
     float width;
     float height;
 
-    public Player(float xLocation, float yLocation, float width, float height) {
-        this.xLocation = xLocation;
-        this.yLocation = yLocation;
+    Rectangle bodyHitbox;
+    Rectangle feetHitbox;
+
+    boolean isOnGround;
+
+    public Player(float x, float y, float width, float height) {
+        this.x = x;
+        this.y = y;
         this.width = width;
         this.height = height;
+
+        bodyHitbox = new Rectangle(x, (y + (height / 10)), width, (height - (height / 10)));
+        feetHitbox = new Rectangle(x, (y), width, (height / 10));
     }
 
-    public void update() {
-
+    public void updatePosition() {
+        bodyHitbox.setPosition((int) x, (int) (y + (height / 10)));
+        feetHitbox.setPosition((int) x, (int) (y));
     }
 }

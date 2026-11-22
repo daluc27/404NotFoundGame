@@ -22,12 +22,16 @@ public class Main extends ApplicationAdapter {
     private Texture image;
     private ShapeRenderer shapeRenderer;
     private Player player;
+    private Block block;
+    private Block ground;
     //float playerWidth = 25;
     //float playerHeight = 50;
 
     @Override
     public void create() {
         player = new Player(0, 0, 25, 50);
+        block = new Block(100, 0, 25, 25);
+        ground = new Block(0, 0, Gdx.graphics.getWidth(), 1);
         shapeRenderer = new ShapeRenderer();
     }
 
@@ -35,39 +39,65 @@ public class Main extends ApplicationAdapter {
     public void render() {
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
 
+        player.isOnGround = false;
+
+        block.updatePosition();
+        player.updatePosition();
+
+        if (player.feetHitbox.overlaps(ground.hitbox) || player.feetHitbox.overlaps(block.hitbox)) {
+            player.isOnGround = true;
+        }
+
         //Going left
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            player.xLocation -= 5;
+            player.x -= 5;
+
+            block.updatePosition();
+            player.updatePosition();
+
+            if (player.bodyHitbox.overlaps(block.hitbox)) {
+                player.x += 5;
+            }
         }
 
         //Going right
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            player.xLocation += 5;
+            player.x += 5;
+
+            block.updatePosition();
+            player.updatePosition();
+
+            if (player.bodyHitbox.overlaps(block.hitbox)) {
+                player.x -= 5;
+            }
         }
 
         //Bending
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            player.height= 25;
-        }else {
+            player.height = 25;
+        } else {
             player.height = 50;
         }
 
         //Jumping
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            player.yLocation = 200;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && player.isOnGround) {
+            player.y = 200;
         }
 
         //Landing
-        if (!(player.yLocation == 0)) {
-            player.yLocation -= 3;
+        if (!player.isOnGround) {
+            player.y -= 3;
         }
 
-        player.xLocation = MathUtils.clamp(player.xLocation,0,Gdx.graphics.getWidth() - player.width);
-        player.yLocation = MathUtils.clamp(player.yLocation,0,Gdx.graphics.getHeight() - player.height);
+
+        player.x = MathUtils.clamp(player.x, 0, Gdx.graphics.getWidth() - player.width);
+        player.y = MathUtils.clamp(player.y, 0, Gdx.graphics.getHeight() - player.height);
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(Color.BLUE);
-        shapeRenderer.rect(player.xLocation, player.yLocation, player.width, player.height);
+        shapeRenderer.rect(player.x, player.y, player.width, player.height);
+        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.rect(block.x, block.y, block.width, block.height);
         shapeRenderer.end();
     }
 
@@ -75,5 +105,6 @@ public class Main extends ApplicationAdapter {
     public void dispose() {
         batch.dispose();
         image.dispose();
+        shapeRenderer.dispose();
     }
 }
