@@ -31,6 +31,7 @@ public class Main extends ApplicationAdapter {
     ArrayList<Block> blocks;
     //float playerWidth = 25;
     //float playerHeight = 50;
+    float delta;
 
     @Override
     public void create() {
@@ -45,38 +46,26 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
+        delta = Gdx.graphics.getDeltaTime();
 
-        player.isOnGround = false;
-
-        block.updatePosition();
-        player.updatePosition();
-
-        if (player.feetHitbox.overlaps(ground.hitbox) || player.feetHitbox.overlaps(block.hitbox)) {
+        if (player.feetHitbox.overlaps(ground.hitbox)) {
             player.isOnGround = true;
+        }
+
+        for (Block b : blocks) {
+            if (player.feetHitbox.overlaps(b.hitbox)) {
+                player.isOnGround = true;
+            }
         }
 
         //Going left
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            player.x -= 5;
-
-            block.updatePosition();
-            player.updatePosition();
-
-            if (player.bodyHitbox.overlaps(block.hitbox)) {
-                player.x += 5;
-            }
+            moving(-150);
         }
 
         //Going right
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            player.x += 5;
-
-            block.updatePosition();
-            player.updatePosition();
-
-            if (player.bodyHitbox.overlaps(block.hitbox)) {
-                player.x -= 5;
-            }
+            moving(150);
         }
 
         //Bending
@@ -88,14 +77,18 @@ public class Main extends ApplicationAdapter {
 
         //Jumping
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && player.isOnGround) {
-            player.y = 200;
+            jumping();
         }
 
         //Landing
-        if (!player.isOnGround) {
+        /*if (!player.isOnGround) {
             player.y -= 3;
-        }
+        }*/
 
+        block.updatePosition();
+        player.updatePosition(delta);
+        player.isOnGround = false;
+        System.out.println(player.y);
 
         player.x = MathUtils.clamp(player.x, 0, Gdx.graphics.getWidth() - player.width);
         player.y = MathUtils.clamp(player.y, 0, Gdx.graphics.getHeight() - player.height);
@@ -105,7 +98,7 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.rect(player.x, player.y, player.width, player.height);
         shapeRenderer.setColor(Color.RED);
         for (Block b : blocks) {
-            shapeRenderer.rect(b.x,b.y,b.width,b.height);
+            shapeRenderer.rect(b.x, b.y, b.width, b.height);
         }
         shapeRenderer.end();
     }
@@ -127,9 +120,30 @@ public class Main extends ApplicationAdapter {
 
             String[] lines = line.split(",");
 
-            block = new Block(Float.parseFloat(lines[0]),Float.parseFloat(lines[1]),Float.parseFloat(lines[2]),Float.parseFloat(lines[3]));
+            block = new Block(Float.parseFloat(lines[0]), Float.parseFloat(lines[1]), Float.parseFloat(lines[2]), Float.parseFloat(lines[3]));
             blocks.add(block);
         }
 
     }
+
+    public void moving(float speed) {
+        player.x += speed * delta;
+
+        //block.updatePosition();
+        //player.updatePosition(delta);
+        for (Block b : blocks) {
+            if (player.bodyHitbox.overlaps(b.hitbox)) {
+                player.x -= speed * delta;;
+            }
+        }
+    }
+
+    public void jumping() {
+        player.velocityY = 500;
+        player.isOnGround = false;
+
+        //block.updatePosition();
+        //player.updatePosition(delta);
+    }
+
 }

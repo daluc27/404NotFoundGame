@@ -7,11 +7,13 @@ public class Player {
     float y;
     float width;
     float height;
+    float velocityY;
 
     Rectangle bodyHitbox;
     Rectangle feetHitbox;
 
     boolean isOnGround;
+
 
     public Player(float x, float y, float width, float height) {
         this.x = x;
@@ -23,7 +25,15 @@ public class Player {
         feetHitbox = new Rectangle(x, (y), width, (height / 10));
     }
 
-    public void updatePosition() {
+    public void updatePosition(float delta) {
+        if (!isOnGround) {
+            velocityY -= 1200 * delta;
+        } else {
+            velocityY = 0;
+        }
+
+        y += velocityY * delta;
+
         bodyHitbox.setPosition((int) x, (int) (y + (height / 10)));
         feetHitbox.setPosition((int) x, (int) (y));
     }
