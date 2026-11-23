@@ -12,6 +12,10 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.sun.tools.javac.util.MatchingUtils;
 
 import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 
 /**
@@ -24,15 +28,18 @@ public class Main extends ApplicationAdapter {
     private Player player;
     private Block block;
     private Block ground;
+    ArrayList<Block> blocks;
     //float playerWidth = 25;
     //float playerHeight = 50;
 
     @Override
     public void create() {
         player = new Player(0, 0, 25, 50);
-        block = new Block(100, 0, 25, 25);
         ground = new Block(0, 0, Gdx.graphics.getWidth(), 1);
+        blocks = new ArrayList<>();
         shapeRenderer = new ShapeRenderer();
+
+        readBlockLocations();
     }
 
     @Override
@@ -97,7 +104,9 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.setColor(Color.BLUE);
         shapeRenderer.rect(player.x, player.y, player.width, player.height);
         shapeRenderer.setColor(Color.RED);
-        shapeRenderer.rect(block.x, block.y, block.width, block.height);
+        for (Block b : blocks) {
+            shapeRenderer.rect(b.x,b.y,b.width,b.height);
+        }
         shapeRenderer.end();
     }
 
@@ -106,5 +115,21 @@ public class Main extends ApplicationAdapter {
         batch.dispose();
         image.dispose();
         shapeRenderer.dispose();
+    }
+
+    public void readBlockLocations() {
+        Scanner reader = new Scanner(Gdx.files.internal("files/blockLocations.csv").read());
+
+        reader.nextLine();
+
+        while (reader.hasNextLine()) {
+            String line = reader.nextLine();
+
+            String[] lines = line.split(",");
+
+            block = new Block(Float.parseFloat(lines[0]),Float.parseFloat(lines[1]),Float.parseFloat(lines[2]),Float.parseFloat(lines[3]));
+            blocks.add(block);
+        }
+
     }
 }
